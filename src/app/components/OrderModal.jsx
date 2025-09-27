@@ -2,109 +2,9 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Plus, Minus, ShoppingCart, CreditCard, Heart, X, Star } from "lucide-react";
+import { X, Star, Plus, Minus, ShoppingCart, CreditCard, Heart } from "lucide-react";
 
-const products = [
-  {
-    id: 1,
-    name: "Rico Chair",
-    description: "Elegant modern chair with premium upholstery and sleek design",
-    price: 59900,
-    oldPrice: 89900,
-    discount: 33,
-    material: "Fabric & Wood",
-    color: "Beige",
-    style: "Modern",
-    rating: 4.5,
-    reviews: 128,
-    image1: "/images/sh12.png",
-    image2: "/images/gii441.png",
-    category: "chairs"
-  },
-  {
-    id: 2,
-    name: "Wooden Chair",
-    description: "Handcrafted wooden chair with traditional craftsmanship",
-    price: 124900,
-    oldPrice: 159900,
-    discount: 22,
-    material: "Solid Wood",
-    color: "Brown",
-    style: "Traditional",
-    rating: 4.7,
-    reviews: 95,
-    image1: "/images/gii55.png",
-    image2: "/images/gii551.png",
-    category: "chairs"
-  },
-  {
-    id: 3,
-    name: "Wall Frame",
-    description: "Decorative wall frame perfect for home decoration",
-    price: 79900,
-    oldPrice: 99900,
-    discount: 20,
-    material: "Wood & Glass",
-    color: "Natural",
-    style: "Contemporary",
-    rating: 4.3,
-    reviews: 67,
-    image1: "/images/sh16.png",
-    image2: "/images/gii77.png",
-    category: "wallArt"
-  },
-  {
-    id: 4,
-    name: "Bean Bag Chair",
-    description: "Comfortable bean bag chair for relaxation and comfort",
-    price: 42000,
-    oldPrice: 55000,
-    discount: 24,
-    material: "Fabric",
-    color: "Gray",
-    style: "Casual",
-    rating: 4.4,
-    reviews: 89,
-    image1: "/images/gi88.png",
-    image2: "/images/gi881.png",
-    category: "chairs"
-  },
-  {
-    id: 5,
-    name: "Office Chair",
-    description: "Ergonomic office chair with lumbar support and adjustable height",
-    price: 89900,
-    oldPrice: 119900,
-    discount: 25,
-    material: "Leather & Metal",
-    color: "Black",
-    style: "Professional",
-    rating: 4.6,
-    reviews: 156,
-    image1: "/images/sh15.png",
-    image2: "/images/gi991.png",
-    category: "chairs"
-  },
-  {
-    id: 6,
-    name: "Lamp Set",
-    description: "Modern lamp set with LED lighting and elegant design",
-    price: 29900,
-    oldPrice: 39900,
-    discount: 25,
-    material: "Metal & LED",
-    color: "Silver",
-    style: "Modern",
-    rating: 4.2,
-    reviews: 73,
-    image1: "/images/sh13.png",
-    image2: "/images/gii101.png",
-    category: "lighting"
-  },
-];
-
-// OrderModal Component
-function OrderModal({ product, isOpen, onClose, onAddToCart, onBuyNow }) {
+export default function OrderModal({ product, isOpen, onClose, onAddToCart, onBuyNow }) {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -248,6 +148,18 @@ function OrderModal({ product, isOpen, onClose, onAddToCart, onBuyNow }) {
                       <span className="ml-2 font-medium">{product.style}</span>
                     </div>
                   )}
+                  {(product.seats || product.size || product.pieces) && (
+                    <div>
+                      <span className="text-gray-600">
+                        {product.seats ? 'Seats:' : product.size ? 'Size:' : 'Pieces:'}
+                      </span>
+                      <span className="ml-2 font-medium">
+                        {product.seats ? `${product.seats} Seater` : 
+                         product.size ? product.size :
+                         product.pieces ? `${product.pieces} Pieces` : ''}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -301,136 +213,5 @@ function OrderModal({ product, isOpen, onClose, onAddToCart, onBuyNow }) {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function NewArrival() {
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(price);
-  };
-
-  const handleOrderClick = (product) => {
-    setSelectedProduct(product);
-    setIsOrderModalOpen(true);
-  };
-
-  const handleCloseOrderModal = () => {
-    setIsOrderModalOpen(false);
-    setSelectedProduct(null);
-  };
-
-  const handleAddToCart = (product, quantity) => {
-    console.log('Adding to cart:', product.name, 'Quantity:', quantity);
-    alert(`${quantity} x ${product.name} added to cart!`);
-  };
-
-  const handleBuyNow = (product, quantity) => {
-    console.log('Buy now:', product.name, 'Quantity:', quantity);
-    alert(`Proceeding to checkout for ${quantity} x ${product.name}!`);
-  };
-  return (
-    <section className="min-h-screen py-10 px-4 sm:px-6 lg:px-12 bg-[#FCFCF6]">
-      <div className="mb-12 text-center">
-        <h2
-          className="text-3xl sm:text-4xl font-extrabold uppercase tracking-wide inline-block"
-          style={{
-            color: "#A0937D",
-            letterSpacing: "0.1em",
-          }}
-        >
-          New Arrivals
-        </h2>
-        <div
-          style={{
-            background: "#E7D4B5",
-            height: "6px",
-            width: "140px",
-            margin: "16px auto 0 auto",
-            borderRadius: "6px",
-          }}
-        />
-      </div>
-
-      {/* Grid wrapper */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="bg-white rounded-xl border border-[#EFEFEF] shadow-sm p-4 flex flex-col transition-shadow hover:shadow-lg relative w-full max-w-xs mx-auto"
-            style={{ fontSize: "0.95rem", minHeight: "420px" }}
-          >
-            {/* Discount Badge */}
-            <div className="absolute top-4 left-4 bg-[#A0937D] text-white text-xs font-bold px-2 py-1 rounded z-10">
-              {product.discount}% OFF
-            </div>
-
-            {/* Product image with hover */}
-            <div className="relative w-full h-64 mb-4 group flex items-center justify-center">
-              <div className="relative w-full h-full flex items-center justify-center p-4">
-                <Image
-                  src={product.image1}
-                  alt={product.name}
-                  width={200}
-                  height={200}
-                  className="object-contain transition-opacity rounded-lg group-hover:opacity-0 w-auto h-auto max-w-full max-h-full"
-                />
-                <Image
-                  src={product.image2}
-                  alt={product.name}
-                  width={200}
-                  height={200}
-                  className="object-contain rounded-lg absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity w-auto h-auto max-w-full max-h-full"
-                />
-              </div>
-            </div>
-
-            {/* Details + Button */}
-            <div className="flex flex-col flex-grow justify-between">
-              <div className="mb-4 text-center">
-                <div className="font-semibold text-gray-900 text-base">
-                  {product.name}
-                </div>
-              </div>
-
-              <button
-                onClick={() => handleOrderClick(product)}
-                className="w-full py-2 rounded text-sm font-semibold transition-colors border mt-auto"
-                style={{
-                  backgroundColor: "#A0937D",
-                  color: "#fff",
-                  borderColor: "#A0937D",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = "#8a826b";
-                  e.currentTarget.style.color = "#fff";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = "#A0937D";
-                  e.currentTarget.style.color = "#fff";
-                }}
-              >
-                + Order
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Order Modal */}
-      <OrderModal
-        product={selectedProduct}
-        isOpen={isOrderModalOpen}
-        onClose={handleCloseOrderModal}
-        onAddToCart={handleAddToCart}
-        onBuyNow={handleBuyNow}
-      />
-    </section>
   );
 }

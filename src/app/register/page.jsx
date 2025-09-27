@@ -3,7 +3,6 @@ import { useState } from "react";
 import Link from "next/link";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import Image from "next/image"; // ✅ for logo
 
 const defaultData = {
   Firstname: "",
@@ -54,25 +53,14 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#fbfaf8] relative px-6">
-      {/* ✅ Logo in Top-Left */}
-      <div className="absolute top-6 left-6">
-        <Image
-    src="/images/logo5.png"
-    alt="Furniq Logo"
-    width={100}   // slightly smaller
-    height={100}  // slightly smaller
-    className="object-contain"
-  />
-
-      </div>
-
-      {/* Register Card Centered */}
-      <div className="bg-[#F6E6CB] shadow-xl rounded-2xl w-full max-w-sm px-6 py-8 z-10">
-        <h1 className="text-2xl font-bold text-center text-[#A0937D] mb-6">
+    <div className="min-h-screen flex items-center justify-center bg-[#fbfaf8] relative px-6 pt-28">
+      {/* Register Card */}
+      <div className="bg-[#F6E6CB] shadow-xl rounded-2xl w-full max-w-md px-10 py-6 z-10">
+        <h1 className="text-2xl font-bold text-center text-[#A0937D] mb-4">
           Create Account
         </h1>
-        <form onSubmit={onRegister} className="space-y-4">
+
+        <form onSubmit={onRegister} className="space-y-3">
           {/* First name */}
           <div>
             <label className="block text-sm font-semibold text-[#A0937D]">
@@ -150,10 +138,11 @@ export default function Register() {
 
           {/* Button */}
           <button
-            className={`w-full py-2 rounded-lg text-white font-semibold transition-all duration-200 ${loading
+            className={`w-full py-2 rounded-lg text-white font-semibold transition-all duration-200 ${
+              loading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-[#A0937D] hover:bg-[#8a7b67]"
-              }`}
+            }`}
             type="submit"
             disabled={loading}
           >
@@ -162,7 +151,7 @@ export default function Register() {
         </form>
 
         {/* Sign in link */}
-        <p className="mt-6 text-center text-sm text-[#A0937D]">
+        <p className="mt-4 text-center text-sm text-[#A0937D]">
           Already have an account?{" "}
           <Link href="/signIn" className="font-semibold hover:text-[#8a7b67]">
             Sign In

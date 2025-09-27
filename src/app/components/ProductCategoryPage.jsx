@@ -5,6 +5,45 @@ import Image from "next/image";
 import Link from "next/link";
 import { Filter, X, Grid, List, Star } from "lucide-react";
 import { allProducts, filterOptions, sortOptions } from "../data/products";
+import { productAPI } from "../../lib/api";
+
+// Category mapping function to handle URL-to-category conversion
+const mapUrlToCategory = (urlCategory) => {
+  const categoryMap = {
+    // Direct mappings
+    'sofas': 'sofas',
+    'tables': 'tables', 
+    'beds': 'beds',
+    'lighting': 'lighting',
+    'wall-art': 'wallArt',
+    'wallart': 'wallArt',
+    'cabinets': 'cabinets',
+    'dressing': 'dressing',
+    'planters': 'planters',
+    'figurines': 'figurines',
+    'carpets': 'carpets',
+    'cushions': 'cushions',
+    'curtains': 'curtains',
+    'cookware': 'cookware',
+    'dining-sets': 'diningSets',
+    'diningsets': 'diningSets',
+    'dining': 'diningSets',
+    // Common variations
+    'sofa': 'sofas',
+    'table': 'tables',
+    'bed': 'beds',
+    'light': 'lighting',
+    'cabinet': 'cabinets',
+    'carpet': 'carpets',
+    'cushion': 'cushions',
+    'curtain': 'curtains',
+    'cook': 'cookware',
+    'planter': 'planters',
+    'figurine': 'figurines'
+  };
+  
+  return categoryMap[urlCategory] || urlCategory;
+};
 
 // Custom hook to handle hydration
 const useHydration = () => {
@@ -17,29 +56,115 @@ const useHydration = () => {
   return isHydrated;
 };
 
-export default function ProductCategoryPage({ category, categoryName }) {
+export default function CategoryListingPage({ category, categoryName, defaultFilters }) {
   const isHydrated = useHydration();
-  const [products, setProducts] = useState(allProducts[category] || []);
-  const [filteredProducts, setFilteredProducts] = useState(allProducts[category] || []);
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
   const [sortBy, setSortBy] = useState("newest");
   const [priceRange, setPriceRange] = useState({ min: 0, max: 50000 });
   const [selectedFilters, setSelectedFilters] = useState({});
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Map URL category to database category
+  const mappedCategory = mapUrlToCategory(category);
+  console.log('Original category:', category, 'Mapped category:', mappedCategory);
+  
+  // Validate that the mapped category exists
+  const isValidCategory = allProducts.hasOwnProperty(mappedCategory);
+  console.log('Is valid category:', isValidCategory);
 
-  // Initialize selected filters based on category
+  // Initialize selected filters based on category and optional defaults
   useEffect(() => {
-    const categoryFilters = filterOptions[category] || {};
+    const categoryFilters = filterOptions[mappedCategory] || {};
     const initialFilters = {};
     Object.keys(categoryFilters).forEach(filterType => {
       initialFilters[filterType] = [];
     });
-    setSelectedFilters(initialFilters);
-  }, [category]);
+    if (defaultFilters) {
+      const merged = { ...initialFilters };
+      Object.keys(defaultFilters).forEach((key) => {
+        if (Array.isArray(defaultFilters[key])) {
+          merged[key] = defaultFilters[key];
+        }
+      });
+      setSelectedFilters(merged);
+    } else {
+      setSelectedFilters(initialFilters);
+    }
+  }, [mappedCategory]);
 
-  // Filter and sort products
+  // Fetch products on mount and when category or default filters change
   useEffect(() => {
-    let filtered = [...products];
+    const controller = new AbortController();
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        console.log('Fetching products for category:', mappedCategory);
+        let data;
+        
+        // Try new category-specific APIs first
+        try {
+          switch (mappedCategory) {
+            case 'sofas':
+              data = await productAPI.getSofas();
+              break;
+            case 'cookware':
+              data = await productAPI.getCookware();
+              break;
+            case 'beds':
+              data = await productAPI.getBeds();
+              break;
+            case 'tables':
+              data = await productAPI.getTables();
+              break;
+            default:
+              // Use dynamic category API for other categories
+              console.log('Using dynamic category API for:', mappedCategory);
+              data = await productAPI.getCategoryProducts(mappedCategory);
+          }
+        } catch (apiError) {
+          console.log('New API failed, falling back to original API:', apiError.message);
+          // Fallback to original API
+          const params = new URLSearchParams({ category: mappedCategory });
+          if (defaultFilters) {
+            Object.keys(defaultFilters).forEach((key) => {
+              if (Array.isArray(defaultFilters[key]) && defaultFilters[key].length > 0) {
+                params.set(key, defaultFilters[key].join(","));
+              }
+            });
+          }
+          const res = await fetch(`/api/products?${params.toString()}`, { signal: controller.signal });
+          data = await res.json();
+        }
+        
+        console.log('Products fetched successfully:', data);
+        setProducts(Array.isArray(data.products) ? data.products : []);
+        setIsLoading(false);
+      } catch (e) {
+        if (e.name !== 'AbortError') {
+          console.error('Failed to fetch products for category:', mappedCategory, e);
+          setError(e.message || 'Failed to load products');
+          setProducts([]);
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    if (isHydrated) {
+      fetchProducts();
+    }
+    
+    return () => controller.abort();
+  }, [mappedCategory, defaultFilters, isHydrated]);
+
+  // Filter and sort products client-side
+  useEffect(() => {
+    // Hard guard to avoid any cross-category bleed
+    let filtered = products.filter(p => p.category === mappedCategory);
 
     // Apply price filter
     filtered = filtered.filter(product => 
@@ -73,6 +198,16 @@ export default function ProductCategoryPage({ category, categoryName }) {
         filtered.sort((a, b) => b.id - a.id);
     }
 
+    // Ensure at least 9 cards by repeating items if needed
+    if (filtered.length > 0 && filtered.length < 9) {
+      const padded = [];
+      for (let i = 0; i < 9; i++) {
+        padded.push(filtered[i % filtered.length]);
+      }
+      setFilteredProducts(padded);
+      return;
+    }
+
     setFilteredProducts(filtered);
   }, [products, selectedFilters, priceRange, sortBy]);
 
@@ -86,7 +221,7 @@ export default function ProductCategoryPage({ category, categoryName }) {
   };
 
   const clearAllFilters = () => {
-    const categoryFilters = filterOptions[category] || {};
+    const categoryFilters = filterOptions[mappedCategory] || {};
     const clearedFilters = {};
     Object.keys(categoryFilters).forEach(filterType => {
       clearedFilters[filterType] = [];
@@ -103,6 +238,7 @@ export default function ProductCategoryPage({ category, categoryName }) {
     }).format(price);
   };
 
+
   // Show loading state during hydration
   if (!isHydrated) {
     return (
@@ -115,7 +251,102 @@ export default function ProductCategoryPage({ category, categoryName }) {
     );
   }
 
-  const categoryFilters = filterOptions[category] || {};
+  // Show error if category is invalid
+  if (!isValidCategory) {
+    const availableCategories = Object.keys(allProducts);
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-2xl mx-auto px-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-8">
+            <h2 className="text-2xl font-semibold text-red-800 mb-4">Category Not Found</h2>
+            <p className="text-red-600 mb-6">
+              The category "{category}" could not be found. This might be due to:
+            </p>
+            <ul className="text-sm text-red-600 text-left mb-6 space-y-1">
+              <li>• The category name is misspelled</li>
+              <li>• The category doesn't exist in our database</li>
+              <li>• There was a temporary error loading the data</li>
+            </ul>
+            
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-red-800 mb-3">Available Categories:</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                {availableCategories.map((cat) => (
+                  <span key={cat} className="bg-red-100 text-red-700 px-3 py-1 rounded">
+                    {cat}
+                  </span>
+                ))}
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <button
+                onClick={() => window.history.back()}
+                className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={() => window.location.href = '/'}
+                className="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition-colors"
+              >
+                Go to Home
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h2 className="text-xl font-semibold text-red-800 mb-2">Category Not Found</h2>
+            <p className="text-red-600 mb-4">
+              The category "{category}" could not be found. This might be due to:
+            </p>
+            <ul className="text-sm text-red-600 text-left mb-4">
+              <li>• The category name is misspelled</li>
+              <li>• The category doesn't exist in our database</li>
+              <li>• There was a temporary error loading the data</li>
+            </ul>
+            <div className="space-y-2">
+              <button
+                onClick={() => window.history.back()}
+                className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={() => window.location.href = '/'}
+                className="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition-colors"
+              >
+                Go to Home
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A0937D] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const categoryFilters = filterOptions[mappedCategory] || {};
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -265,12 +496,12 @@ export default function ProductCategoryPage({ category, categoryName }) {
                 ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
                 : "space-y-6"
             }>
-              {filteredProducts.map((product) => (
+              {filteredProducts.map((product, idx) => (
                 <Link
-                  key={product.id}
+                  key={`${product.id}-${idx}`}
                   href={`/products/${product.category}/${product.id}`}
                   className={`bg-white rounded-lg shadow-sm overflow-hidden product-card block ${
-                    viewMode === "list" ? "flex" : ""
+                    viewMode === "list" ? "flex" : "flex flex-col h-full"
                   }`}
                 >
                   {/* Product Image */}
@@ -295,7 +526,7 @@ export default function ProductCategoryPage({ category, categoryName }) {
                   </div>
 
                   {/* Product Info */}
-                  <div className={`p-6 ${viewMode === "list" ? "flex-1" : ""}`}>
+                  <div className={`p-6 flex flex-col flex-grow ${viewMode === "list" ? "flex-1" : ""}`}>
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
                         {product.name}
@@ -349,8 +580,11 @@ export default function ProductCategoryPage({ category, categoryName }) {
                       )}
                     </div>
 
+                    {/* Spacer to push button to bottom */}
+                    <div className="flex-grow"></div>
+
                     {/* View Details Button */}
-                    <div className="flex justify-center">
+                    <div className="flex justify-center mt-auto">
                       <button 
                         className="w-full bg-[#A0937D] text-white py-2 px-4 rounded-md hover:bg-[#8a826b] transition-colors font-medium"
                         suppressHydrationWarning
@@ -378,6 +612,7 @@ export default function ProductCategoryPage({ category, categoryName }) {
           </div>
         </div>
       </div>
+
     </div>
   );
 }
