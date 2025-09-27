@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { allProducts } from '../../data/products';
 
 // GET /api/categories - Get all product categories
-export async function GET(request) {
+export async function GET() {
   try {
     const categories = Object.keys(allProducts).map(category => {
       const products = allProducts[category];

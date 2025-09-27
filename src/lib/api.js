@@ -209,7 +209,7 @@ export const apiUtils = {
 };
 
 // Export all APIs
-export default {
+const apiExports = {
   productAPI,
   cartAPI,
   wishlistAPI,
@@ -217,3 +217,5 @@ export default {
   userAPI,
   apiUtils,
 };
+
+export default apiExports;

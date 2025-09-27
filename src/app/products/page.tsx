@@ -1,11 +1,10 @@
 "use client";
-import DeliveryInfo from "../components/DeliveryInfo";
 import ProductImages from "../components/ProductImages";
 import ProductAccordion from "../components/ProductAccordion";
 import { useState } from "react";
-import { ShoppingCart, User, Heart, Search } from "lucide-react";
+import { Heart } from "lucide-react";
 
-export default function productDetails() {
+export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
 
   // decrease quantity but not below 1
