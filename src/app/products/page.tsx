@@ -7,16 +7,6 @@ import { Heart } from "lucide-react";
 export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
 
-  // decrease quantity but not below 1
-  const decreaseQty = () => {
-    if (quantity > 1) setQuantity(quantity - 1);
-  };
-
-  // increase quantity
-  const increaseQty = () => {
-    setQuantity(quantity + 1);
-  };
-
   return (
     <>
       <div className="px-4 md:px-8 lg:px-16 xl:32 2xl:px-64 relative flex flex-col lg:flex-row gap-16">
