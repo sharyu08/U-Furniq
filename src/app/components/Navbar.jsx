@@ -77,7 +77,7 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-[#ac9875] flex items-center justify-between px-4 md:px-6 py-4">
+    <div className="fixed top-4 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-6">
       {/* Logo (Bigger Size) */}
       <Link href="/" className="flex items-center">
         <img
