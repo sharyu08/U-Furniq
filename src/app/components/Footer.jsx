@@ -63,7 +63,7 @@ export default function Footer() {
           <ul className="space-y-1 text-base text-[#6B5E4F]">
             <li className="flex items-center justify-center sm:justify-start gap-2">
               <Mail className="text-[#A0937D]" size={16} />
-              <span>care@hometown.in</span>
+              <span>care@furniq.in</span>
             </li>
             <li className="flex items-center justify-center sm:justify-start gap-2">
               <Phone className="text-[#8B7F6C]" size={16} />
