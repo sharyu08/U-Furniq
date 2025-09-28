@@ -77,133 +77,136 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="fixed top-4 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-6">
-      {/* Logo (Bigger Size) */}
-      <Link href="/" className="flex items-center">
-        <img
-          src="/images/logo5.png"
-          alt="Logo"
-          className="h-24 w-auto sm:h-28 md:h-32 lg:h-36 object-contain transition-all"
-        />
-      </Link>
-
-      {/* Desktop Navbar (aligned right) */}
-      <nav className="hidden md:flex items-center rounded-full bg-white/25 backdrop-blur-md shadow-sm px-6 py-3 gap-6 ml-auto">
-        {/* Nav Links with Dropdowns */}
-        <div className="flex items-center gap-4 text-sm lg:text-base font-semibold tracking-wide text-[#3b3323]">
-          {navItems.map(({ label, href, subLinks }) => (
-            <div key={label} className="relative">
-              <button
-                onClick={() =>
-                  setOpenDropdown(openDropdown === label ? null : label)
-                }
-                className={`px-3 py-2 rounded-full flex items-center gap-1 whitespace-nowrap transition-colors duration-150 ${
-                  isActive(href)
-                    ? "bg-[#F6E6CB]/80 text-[#A0937D] shadow"
-                    : "hover:bg-[#A0937D]/70 hover:text-white"
-                }`}
-              >
-                {label}
-                <ChevronDown
-                  size={16}
-                  className={`transition-transform duration-300 ${
-                    openDropdown === label ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              {/* Dropdown */}
-              {openDropdown === label && subLinks && (
-                <div className="absolute left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-[#E7D4B5] py-3 flex flex-col z-50">
-                  {subLinks.map(({ href, label }) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      className="px-4 py-2 text-sm hover:bg-[#F6E6CB]/60 hover:text-[#A0937D] transition rounded-md"
-                    >
-                      {label}
-                    </Link>
-                  ))}
-                </div>
-              )}
+    <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link href="/" className="flex items-center">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-[#A0937D] rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-lg">F</span>
+              </div>
+              <span className="text-2xl font-bold text-[#A0937D]">Furniq</span>
             </div>
-          ))}
-        </div>
+          </Link>
 
-        {/* Search + Icons */}
-        <div className="flex items-center gap-3 ml-3">
-          <div className="relative">
+          {/* Desktop Navbar */}
+          <nav className="hidden md:flex items-center space-x-8">
+            {/* Nav Links with Dropdowns */}
+            {navItems.map(({ label, href, subLinks }) => (
+              <div key={label} className="relative">
+                <button
+                  onClick={() =>
+                    setOpenDropdown(openDropdown === label ? null : label)
+                  }
+                  className={`flex items-center gap-1 text-gray-700 hover:text-[#A0937D] transition-colors duration-200 font-medium ${
+                    isActive(href) ? "text-[#A0937D]" : ""
+                  }`}
+                >
+                  {label}
+                  <ChevronDown
+                    size={16}
+                    className={`transition-transform duration-300 ${
+                      openDropdown === label ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {/* Dropdown */}
+                {openDropdown === label && subLinks && (
+                  <div className="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    {subLinks.map(({ href, label }) => (
+                      <Link
+                        key={href}
+                        href={href}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#A0937D] transition-colors"
+                      >
+                        {label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {/* Search + Icons */}
+            <div className="flex items-center gap-4 ml-6">
+              <div className="relative">
+                <Search
+                  className="cursor-pointer text-gray-600 hover:text-[#A0937D] transition-colors"
+                  size={20}
+                  onClick={() => setSearchOpen(!searchOpen)}
+                />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className={`absolute right-0 top-8 transition-all duration-300 bg-white text-gray-700 rounded-md px-3 py-2 shadow-lg border border-gray-200 ${
+                    searchOpen
+                      ? "w-40 sm:w-48 opacity-100"
+                      : "w-0 opacity-0 overflow-hidden"
+                  }`}
+                  suppressHydrationWarning
+                />
+              </div>
+              <Link href="/signIn">
+                <User
+                  className="cursor-pointer text-gray-600 hover:text-[#A0937D] transition-colors"
+                  size={20}
+                />
+              </Link>
+              <Link href="/liked-products" className="relative">
+                <Heart
+                  className="cursor-pointer text-gray-600 hover:text-[#A0937D] transition-colors"
+                  size={20}
+                />
+                {isHydrated && wishlistCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 min-w-[18px] h-[18px] flex items-center justify-center font-medium">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+          </nav>
+
+          {/* Mobile Navbar */}
+          <div className="md:hidden flex items-center gap-4">
             <Search
-              className="cursor-pointer text-[#3b3323] hover:text-[#A0937D]"
-              size={22}
+              className="cursor-pointer text-gray-600 hover:text-[#A0937D] transition-colors"
+              size={20}
               onClick={() => setSearchOpen(!searchOpen)}
             />
-            <input
-              type="text"
-              placeholder="Search..."
-              className={`absolute right-0 top-9 transition-all duration-300 bg-white/90 text-[#3b3323] rounded-md px-3 py-2 shadow-md ${
-                searchOpen
-                  ? "w-40 sm:w-48 opacity-100"
-                  : "w-0 opacity-0 overflow-hidden"
-              }`}
-              suppressHydrationWarning
-            />
-          </div>
-          <Link href="/signIn">
-            <User
-              className="cursor-pointer text-[#3b3323] hover:text-[#A0937D] transition"
-              size={22}
-            />
-          </Link>
-          <Link href="/liked-products" className="relative">
-            <Heart
-              className="cursor-pointer text-[#3b3323] hover:text-[#A0937D]"
-              size={22}
-            />
-            {isHydrated && wishlistCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-1 min-w-[18px] h-[18px] flex items-center justify-center">
-                {wishlistCount}
-              </span>
-            )}
-          </Link>
-        </div>
-      </nav>
-
-      {/* Mobile Navbar */}
-      <div className="md:hidden flex items-center gap-4 ml-auto">
-        <Search
-          className="cursor-pointer text-[#3b3323] hover:text-[#A0937D]"
-          size={22}
-          onClick={() => setSearchOpen(!searchOpen)}
-        />
-        <button
-          className="focus:outline-none"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle Menu"
-        >
-          {menuOpen ? (
-            <X className="text-[#3b3323]" size={26} />
-          ) : (
-            <Menu className="text-[#3b3323]" size={26} />
-          )}
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
-      {menuOpen && (
-        <div className="absolute top-20 left-4 right-4 bg-white/95 shadow-md rounded-2xl p-6 flex flex-col gap-4 text-[#3b3323] font-semibold md:hidden z-40">
-          {navItems.map(({ label, href }) => (
-            <Link
-              key={label}
-              href={href}
-              className="px-4 py-2 rounded-md hover:bg-[#A0937D]/70 hover:text-white"
-              onClick={() => setMenuOpen(false)}
+            <button
+              className="focus:outline-none"
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Toggle Menu"
             >
-              {label}
-            </Link>
-          ))}
+              {menuOpen ? (
+                <X className="text-gray-600" size={24} />
+              ) : (
+                <Menu className="text-gray-600" size={24} />
+              )}
+            </button>
+          </div>
         </div>
-      )}
+
+        {/* Mobile Menu */}
+        {menuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-200 shadow-lg">
+            <div className="px-4 py-4 space-y-2">
+              {navItems.map(({ label, href }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-[#A0937D] transition-colors rounded-md"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
