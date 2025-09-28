@@ -4,8 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { allProducts } from "../data/products";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+// Navbar and Footer are already included in layout.jsx
 import { Search, Filter, Grid, List, Heart, ShoppingCart } from "lucide-react";
 
 export default function ShopPage() {
@@ -86,8 +85,7 @@ export default function ShopPage() {
   ];
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <Navbar />
+    <div className="bg-gray-50 min-h-screen pt-20">
       
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-[#A0937D] to-[#8a826b] py-16">
@@ -339,8 +337,6 @@ export default function ShopPage() {
           )}
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }
