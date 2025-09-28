@@ -8,7 +8,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#ac9875] text-[#1F1B16] pt-6 pb-4 mt-10 relative overflow-hidden text-base">
       {/* Background Accent */}
-      <div className="absolute inset-0 bg-[#ac9875]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#E7D4B5]/40 via-[#F6E6CB] to-[#F6E6CB]" />
 
       <div className="relative max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center sm:text-left">
         
